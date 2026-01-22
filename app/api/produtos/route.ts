@@ -1,8 +1,16 @@
-import { NextResponse } from 'next/server';
 import * as service from '@/services/produtos.service';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  return NextResponse.json({ error: 'erro desconhecido' }, { status: 500 });
+  const produtos = await service.getAllProdutos();
+  const produtosSerialized = produtos.map(produto => {
+    return JSON.parse(
+      JSON.stringify(produto, (_key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      )
+    )
+  })
+  return NextResponse.json(produtosSerialized);
 }
 
 export async function POST(request: Request) {
