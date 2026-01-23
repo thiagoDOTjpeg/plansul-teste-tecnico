@@ -17,7 +17,7 @@ export const create = async (data: Omit<estoque, 'id' | 'atualizado_em'>): Promi
   });
 };
 
-export const update = async (id: bigint, data: Partial<Omit<estoque, 'id' | 'atualizado_em' | "produto_id">>): Promise<estoque> => {
+export const update = async (id: bigint, data: Partial<Omit<estoque, 'id' | "produto_id">>): Promise<estoque> => {
   return prisma.estoque.update({
     where: { id },
     data,
