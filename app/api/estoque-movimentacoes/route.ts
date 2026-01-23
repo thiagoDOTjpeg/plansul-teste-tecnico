@@ -21,6 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Id do produto, quantidade e o tipo de movimentação são obrigatórios" }, { status: 400 });
     }
 
+    if (quantidade < 0) {
+      return NextResponse.json({ error: "Quantidade não pode ser negativa" }, { status: 400 });
+    }
+
     const newMovimentacao = await service.createEstoqueMovimentacao({
       produto_id,
       quantidade,
