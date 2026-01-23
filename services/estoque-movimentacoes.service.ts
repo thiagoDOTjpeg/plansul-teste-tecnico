@@ -13,7 +13,7 @@ export const getEstoqueMovimentacaoById = async (id: bigint): Promise<estoque_mo
 
 export const createEstoqueMovimentacao = async (data: Omit<estoque_movimentacoes, 'id' | 'criado_em'>): Promise<estoque_movimentacoes> => {
   const { produto_id, quantidade, tipo } = data;
-  const estoqueAtual = await estoqueRepository.findById(produto_id);
+  const estoqueAtual = await estoqueRepository.findByProdutoId(produto_id);
 
   if (!estoqueAtual) throw new Error("Estoque não encontrado");
 
