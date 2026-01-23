@@ -1,5 +1,4 @@
 import prisma from "@/lib/db";
-import * as estoqueRepository from "@/repositories/estoque.repository";
 import { estoque_movimentacoes } from '../app/generated/prisma/client';
 import * as repository from '../repositories/estoque-movimentacoes.repository';
 
@@ -13,27 +12,32 @@ export const getEstoqueMovimentacaoById = async (id: bigint): Promise<estoque_mo
 
 export const createEstoqueMovimentacao = async (data: Omit<estoque_movimentacoes, 'id' | 'criado_em'>): Promise<estoque_movimentacoes> => {
   const { produto_id, quantidade, tipo } = data;
-  const estoqueAtual = await estoqueRepository.findByProdutoId(produto_id);
-
-  if (!estoqueAtual) throw new Error("Estoque não encontrado");
-
-  const resultadoOperacao = tipo === "entrada" ? estoqueAtual.quantidade + quantidade : estoqueAtual.quantidade - quantidade;
-  if (resultadoOperacao < 0) {
-    throw new Error("Quantidade de movimentação inválida para a quantidade do estoque");
-  }
 
   return await prisma.$transaction(async (tx) => {
+    const estoqueAtual = await tx.estoque.findUnique({
+      where: { produto_id }
+    });
+
+    if (!estoqueAtual) throw new Error("Estoque não encontrado para este produto");
+
+    if (tipo === "saida" && estoqueAtual.quantidade < quantidade) {
+      throw new Error("Quantidade insuficiente em estoque para esta saída");
+    }
+
     await tx.estoque.update({
-      where: { id: estoqueAtual.id },
+      where: { produto_id },
       data: {
-        quantidade: resultadoOperacao,
+        quantidade: {
+          [tipo === "entrada" ? "increment" : "decrement"]: quantidade
+        },
         atualizado_em: new Date()
       }
     });
 
-    const newEstoqueMovimentacao = await tx.estoque_movimentacoes.create({ data: { produto_id, quantidade, tipo } });
-    return newEstoqueMovimentacao
-  })
+    return await tx.estoque_movimentacoes.create({
+      data: { produto_id, quantidade, tipo }
+    });
+  });
 };
 
 export const updateEstoqueMovimentacao = async (id: bigint, data: Partial<Omit<estoque_movimentacoes, 'id' | 'criado_em'>>): Promise<estoque_movimentacoes> => {
