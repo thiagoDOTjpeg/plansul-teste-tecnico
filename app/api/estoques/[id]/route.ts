@@ -14,7 +14,6 @@ export async function PUT(request: Request, { params }: Params) {
     const { quantidade } = body;
     const quantidadeNova = Number(quantidade);
 
-    // Fail Fast: Validação básica no Controller
     if (isNaN(quantidadeNova) || quantidadeNova < 0) {
       return NextResponse.json({ error: "Quantidade inválida ou negativa" }, { status: 400 });
     }
