@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 import { RHFInputField, RHFSelectField } from "./form-fields";
 
 interface DynamicFormProps<T extends z.ZodType<any, any, any>> {
@@ -18,6 +18,7 @@ interface DynamicFormProps<T extends z.ZodType<any, any, any>> {
     type?: string; // For input fields
     options?: { label: string; value: string }[]; // For select fields
     component: "input" | "select";
+    disabled?: boolean;
   }>;
   submitButtonText?: string;
   isSubmitting?: boolean;
@@ -47,6 +48,7 @@ export function DynamicForm<T extends z.ZodType<any, any, any>>({
                 label={fieldConfig.label}
                 placeholder={fieldConfig.placeholder}
                 type={fieldConfig.type}
+                disabled={fieldConfig.disabled}
               />
             )}
             {fieldConfig.component === "select" && (
@@ -55,6 +57,7 @@ export function DynamicForm<T extends z.ZodType<any, any, any>>({
                 label={fieldConfig.label}
                 placeholder={fieldConfig.placeholder}
                 options={fieldConfig.options}
+                disabled={fieldConfig.disabled}
               />
             )}
           </div>

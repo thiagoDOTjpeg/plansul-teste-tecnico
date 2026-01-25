@@ -77,29 +77,29 @@ export function EstoquesView() {
         onEdit={handleEdit}
         editButtonText="Ajustar"
         searchComponent={
-          <>
-            <Input
-              placeholder="Buscar por Nome ou SKU..."
-              value={search}
-              onChange={(e) => updateFilters("search", e.target.value)}
-            />
-            <Select
-              value={categoriaId}
-              onValueChange={(v) => updateFilters("categoria_id", v)}
-            >
-              <SelectTrigger className="w-50">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as Categorias</SelectItem>
-                {categorias?.map((c) => (
-                  <SelectItem key={c.id} value={c.id.toString()}>
-                    {c.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </>
+          <Input
+            placeholder="Buscar por Nome ou SKU..."
+            value={search}
+            onChange={(e) => updateFilters("search", e.target.value)}
+          />
+        }
+        filterComponent={
+          <Select
+            value={categoriaId}
+            onValueChange={(v) => updateFilters("categoria_id", v)}
+          >
+            <SelectTrigger className="w-50">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Categorias</SelectItem>
+              {categorias?.map((c) => (
+                <SelectItem key={c.id} value={c.id.toString()}>
+                  {c.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         }
       />
 

@@ -1,4 +1,3 @@
-import { useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -14,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFormContext } from "react-hook-form";
 
 interface FormFieldProps {
   name: string;
@@ -21,6 +21,7 @@ interface FormFieldProps {
   placeholder?: string;
   type?: string;
   options?: { label: string; value: string }[];
+  disabled?: boolean;
 }
 
 export function RHFInputField({
@@ -28,6 +29,7 @@ export function RHFInputField({
   label,
   placeholder,
   type = "text",
+  disabled,
 }: FormFieldProps) {
   const { control } = useFormContext();
 
@@ -39,7 +41,12 @@ export function RHFInputField({
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input placeholder={placeholder} type={type} {...field} />
+            <Input
+              placeholder={placeholder}
+              type={type}
+              disabled={disabled}
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

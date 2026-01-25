@@ -27,6 +27,7 @@ export function AddEstoqueMovimentacaoModal({
       label: "Produto",
       placeholder: "ID do produto",
       component: "input" as const,
+      disabled: true,
     },
     {
       name: "quantidade" as const,
