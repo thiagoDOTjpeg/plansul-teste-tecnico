@@ -57,6 +57,7 @@ export const useUpdateEstoque = () => {
     mutationFn: updateEstoque,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["estoques"] });
+      queryClient.invalidateQueries({ queryKey: ["estoques-movimentacoes"] });
     }
   })
 }
