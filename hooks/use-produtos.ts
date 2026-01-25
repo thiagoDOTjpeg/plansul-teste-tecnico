@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 
 // Zod Schemas
@@ -19,6 +19,13 @@ export const updateProdutoSchema = z.object({
   marca: z.string().optional(),
 });
 
+export interface ProdutosFilters {
+  search?: string;
+  categoria_id?: string;
+  page?: number;
+  limit?: number;
+}
+
 // Types
 export type Produto = {
   id: string; // Prisma BigInt is serialized as string
@@ -37,14 +44,28 @@ export type Produto = {
   } | null;
 };
 
+export type ProdutosResponse = {
+  data: Produto[];
+  total: number;
+  page: number;
+  limit: number;
+  lastPage: number;
+};
+
 export type CreateProdutoPayload = z.infer<typeof createProdutoSchema>;
 export type UpdateProdutoPayload = z.infer<typeof updateProdutoSchema>;
 
 // API Functions
-const fetchProdutos = async (): Promise<Produto[]> => {
-  const response = await fetch("/api/produtos");
+const fetchProdutos = async (filters: ProdutosFilters): Promise<ProdutosResponse> => {
+  const params = new URLSearchParams();
+  if (filters.search) params.append("search", filters.search);
+  if (filters.categoria_id && filters.categoria_id !== "all") params.append("categoria_id", filters.categoria_id);
+  if (filters.page) params.append("page", filters.page.toString());
+  if (filters.limit) params.append("limit", filters.limit.toString());
+
+  const response = await fetch(`/api/produtos?${params.toString()}`);
   if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    throw new Error("Falha ao buscar dados do estoque");
   }
   return response.json();
 };
@@ -102,10 +123,10 @@ const deleteProduto = async (id: string): Promise<void> => {
 };
 
 // React Query Hooks
-export const useProdutos = () => {
-  return useQuery<Produto[], Error>({
-    queryKey: ["produtos"],
-    queryFn: fetchProdutos,
+export const useProdutos = (filters: ProdutosFilters) => {
+  return useQuery<ProdutosResponse, Error>({
+    queryKey: ["produtos", filters],
+    queryFn: () => fetchProdutos(filters),
   });
 };
 

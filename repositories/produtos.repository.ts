@@ -1,10 +1,44 @@
-import { produtos } from '@/generated/prisma/client';
+import { Prisma, produtos } from '@/generated/prisma/client';
 import prisma from '@/lib/db';
 
-export const findAll = async (): Promise<produtos[]> => {
-  return prisma.produtos.findMany({
-    include: { categorias: true },
-  });
+export interface ProdutosFilters {
+  search?: string;
+  categoria_id?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const findAll = async (filters: ProdutosFilters) => {
+  const { search, categoria_id, page = 1, limit = 10 } = filters;
+  const skip = (page - 1) * limit;
+
+  const where: Prisma.produtosWhereInput = {
+    AND: [
+      search ? {
+        OR: [
+          { nome: { contains: search, mode: 'insensitive' } },
+          { sku: { contains: search, mode: 'insensitive' } },
+          { marca: { contains: search, mode: 'insensitive' } }
+        ]
+      } : {},
+      categoria_id ? { categorias: { id: BigInt(categoria_id) } } : {},
+    ]
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.produtos.findMany({
+      where,
+      include: { categorias: true },
+      skip,
+      take: limit,
+      orderBy: { criado_em: "desc" }
+    }),
+    prisma.produtos.count({ where })
+  ]);
+
+  const lastPage = Math.ceil(total / limit);
+
+  return { data, total, page, limit, lastPage }
 };
 
 export const findById = async (id: bigint): Promise<produtos | null> => {
