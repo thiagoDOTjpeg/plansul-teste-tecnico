@@ -2,8 +2,9 @@ import prisma from '@/lib/db';
 import { estoque } from '../app/generated/prisma/client';
 import * as repository from '../repositories/estoque.repository';
 
-export const getAllEstoque = async (): Promise<estoque[]> => {
-  return repository.findAll();
+export const getAllEstoque = async (filters: repository.EstoqueFilters) => {
+  const result = await repository.findAll(filters);
+  return result;
 };
 
 export const getEstoqueById = async (id: bigint): Promise<estoque | null> => {
