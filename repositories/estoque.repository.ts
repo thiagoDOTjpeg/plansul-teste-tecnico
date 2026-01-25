@@ -27,10 +27,11 @@ export const findAll = async (filters: EstoqueFilters) => {
     ]
   };
 
+
   const [data, total] = await Promise.all([
     prisma.estoque.findMany({
       where,
-      include: { produtos: { include: { categorias: true } } },
+      include: { produtos: true },
       skip,
       take: limit,
       orderBy: { atualizado_em: 'desc' }
@@ -38,7 +39,9 @@ export const findAll = async (filters: EstoqueFilters) => {
     prisma.estoque.count({ where })
   ]);
 
-  return { data, total, page, limit };
+  const lastPage = Math.ceil(total / limit);
+
+  return { data, total, page, limit, lastPage };
 };
 
 export const findById = async (id: bigint): Promise<estoque | null> => {

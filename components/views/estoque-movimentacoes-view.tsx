@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 
 import { useEstoqueMovimentacoes } from "@/hooks/use-estoque-movimentacoes";
 import { DataTable } from "../custom/data-table";

@@ -6,13 +6,12 @@ export const updateEstoqueSchema = z.object({
   quantidade: z.string().min(0, "Quantidade é obrigatória")
 });
 
-export type EstoqueFilters = {
+export interface EstoqueFilters {
   search?: string;
   categoria_id?: string;
-  critical?: boolean;
   page?: number;
   limit?: number;
-};
+}
 
 export type Estoque = {
   id: string;
@@ -36,6 +35,7 @@ export type EstoqueResponse = {
   total: number;
   page: number;
   limit: number;
+  lastPage: number;
 };
 
 export type UpdateEstoquePayload = z.infer<typeof updateEstoqueSchema>;
@@ -44,23 +44,22 @@ const fetchEstoques = async (filters: EstoqueFilters): Promise<EstoqueResponse> 
   const params = new URLSearchParams();
   if (filters.search) params.append("search", filters.search);
   if (filters.categoria_id && filters.categoria_id !== "all") params.append("categoria_id", filters.categoria_id);
-  if (filters.critical) params.append("critical", "true");
   if (filters.page) params.append("page", filters.page.toString());
   if (filters.limit) params.append("limit", filters.limit.toString());
 
   const response = await fetch(`/api/estoques?${params.toString()}`);
   if (!response.ok) {
-    throw new Error("Failed to fetch stocks");
+    throw new Error("Falha ao buscar dados do estoque");
   }
   return response.json();
 };
 
-export const useEstoques = (filters: EstoqueFilters = {}) => {
-  return useQuery<EstoqueResponse, Error>({
+export function useEstoques(filters: EstoqueFilters = {}) {
+  return useQuery({
     queryKey: ["estoques", filters],
     queryFn: () => fetchEstoques(filters),
   });
-};
+}
 
 export const useUpdateEstoque = () => {
   const queryClient = useQueryClient();

@@ -24,6 +24,8 @@ export function EstoquesView() {
 
   const search = searchParams.get("search") || "";
   const categoriaId = searchParams.get("categoria_id") || "all";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = 10;
 
   const {
     data: estoques,
@@ -33,14 +35,19 @@ export function EstoquesView() {
   } = useEstoques({
     search,
     categoria_id: categoriaId,
+    page,
+    limit,
   });
+
   const { data: categorias } = useCategories();
-  const columns = estoqueColumns({
-    onMovimentar: (estoque: Estoque) => setModalEstoque(estoque),
-  });
+
   const [modalEstoque, setModalEstoque] = useState<Estoque | null>(null);
   const [selectedEstoque, setSelectedEstoque] = useState<Estoque | null>(null);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+
+  const columns = estoqueColumns({
+    onMovimentar: (estoque: Estoque) => setModalEstoque(estoque),
+  });
 
   const handleEdit = (id: string) => {
     const estoqueToEdit = estoques?.data?.find((est) => est.id === id);
@@ -50,20 +57,25 @@ export function EstoquesView() {
     }
   };
 
-  const updateFilters = (key: string, value: string | boolean) => {
+  const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
+
     if (!value || value === "all") {
       params.delete(key);
     } else {
-      params.set(key, String(value));
+      params.set(key, value);
     }
+    if (key !== "page") {
+      params.delete("page");
+    }
+
     router.push(`${pathname}?${params.toString()}`);
   };
 
   if (isError) {
     return (
-      <div className="text-red-500">
-        Error: {error?.message || "Failed to load estoques."}
+      <div className="text-red-500 p-4 border rounded bg-red-50">
+        Erro ao carregar estoque: {error?.message || "Erro desconhecido."}
       </div>
     );
   }
@@ -76,11 +88,15 @@ export function EstoquesView() {
         isLoading={isLoading}
         onEdit={handleEdit}
         editButtonText="Ajustar"
+        pageCount={estoques?.lastPage}
+        currentPage={page}
+        onPageChange={(newPage) => updateFilters("page", newPage.toString())}
         searchComponent={
           <Input
             placeholder="Buscar por Nome ou SKU..."
             value={search}
             onChange={(e) => updateFilters("search", e.target.value)}
+            className="max-w-sm"
           />
         }
         filterComponent={
@@ -88,8 +104,8 @@ export function EstoquesView() {
             value={categoriaId}
             onValueChange={(v) => updateFilters("categoria_id", v)}
           >
-            <SelectTrigger className="w-50">
-              <SelectValue placeholder="Categoria" />
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrar por Categoria" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as Categorias</SelectItem>

@@ -4,7 +4,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
@@ -31,10 +30,11 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   actionButtons?: React.ReactNode[];
   editButtonText?: string;
   deleteButtonText?: string;
-  // TODO: Implement actual pagination logic
-  // currentPage?: number;
-  // totalPages?: number;
-  // onPageChange?: (page: number) => void;
+
+  // Props para Paginação Manual
+  pageCount?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function DataTable<TData extends { id: string }, TValue>({
@@ -48,12 +48,16 @@ export function DataTable<TData extends { id: string }, TValue>({
   actionButtons,
   editButtonText,
   deleteButtonText,
+  pageCount,
+  currentPage = 1,
+  onPageChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
+    pageCount: pageCount,
+    manualPagination: true,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), // Enable pagination
   });
 
   const generateSkeletonRow = (columnCount: number, key: number) => (
@@ -82,26 +86,26 @@ export function DataTable<TData extends { id: string }, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              // Render skeleton rows when loading
               Array.from({ length: 5 }).map((_, index) =>
-                generateSkeletonRow(columns.length, index),
+                generateSkeletonRow(
+                  columns.length + (onEdit || onDelete ? 1 : 0),
+                  index,
+                ),
               )
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -122,7 +126,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                       {onEdit && (
                         <Button
                           variant="ghost"
-                          onClick={() => onEdit(row.original.id)} // Assuming id field exists
+                          onClick={() => onEdit(row.original.id)}
                           className="mr-2"
                         >
                           {editButtonText || "Edit"}
@@ -131,7 +135,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                       {onDelete && (
                         <Button
                           variant="ghost"
-                          onClick={() => onDelete(row.original.id)} // Assuming id field exists
+                          onClick={() => onDelete(row.original.id)}
                         >
                           {deleteButtonText || "Delete"}
                         </Button>
@@ -153,22 +157,26 @@ export function DataTable<TData extends { id: string }, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-sm text-muted-foreground mr-4">
+          Página {currentPage} de {pageCount || 1}
+        </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
+          onClick={() => onPageChange?.(currentPage - 1)}
+          disabled={currentPage <= 1 || isLoading}
         >
-          Previous
+          Anterior
         </Button>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
+          onClick={() => onPageChange?.(currentPage + 1)}
+          disabled={currentPage >= (pageCount || 1) || isLoading}
         >
-          Next
+          Próximo
         </Button>
       </div>
     </div>
