@@ -1,8 +1,46 @@
 import prisma from "@/lib/db";
-import { estoque_movimentacoes } from "../app/generated/prisma/client";
+import { estoque_movimentacoes, Prisma } from "../app/generated/prisma/client";
 
-export const findAll = async (): Promise<estoque_movimentacoes[]> => {
-  return prisma.estoque_movimentacoes.findMany({ include: { produtos: true } });
+export interface EstoqueMovimentacaoFilters {
+  search?: string;
+  tipo?: "entrada" | "saida";
+  page?: number;
+  limit?: number;
+}
+
+export const findAll = async (filters: EstoqueMovimentacaoFilters = {}): Promise<{ data: estoque_movimentacoes[]; total: number; page: number; limit: number; lastPage: number }> => {
+  const { search, tipo, page = 1, limit = 10 } = filters;
+  const skip = (page - 1) * limit;
+
+  const where: Prisma.estoque_movimentacoesWhereInput = {
+    AND: [
+      tipo ? { tipo } : {},
+      search ? {
+        produtos: {
+          OR: [
+            { sku: { contains: search, mode: 'insensitive' } },
+            { nome: { contains: search, mode: 'insensitive' } },
+            { marca: { contains: search, mode: 'insensitive' } }
+          ]
+        }
+      } : {},
+    ]
+  };
+
+  const [data, total] = await Promise.all([
+    prisma.estoque_movimentacoes.findMany({
+      where,
+      include: { produtos: true },
+      skip,
+      take: limit,
+      orderBy: { criado_em: 'desc' }
+    }),
+    prisma.estoque_movimentacoes.count({ where })
+  ]);
+
+  const lastPage = Math.ceil(total / limit);
+
+  return { data, total, page, limit, lastPage };
 };
 
 export const findById = async (id: bigint): Promise<estoque_movimentacoes | null> => {

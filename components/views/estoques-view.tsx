@@ -104,7 +104,7 @@ export function EstoquesView() {
             value={categoriaId}
             onValueChange={(v) => updateFilters("categoria_id", v)}
           >
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-50">
               <SelectValue placeholder="Filtrar por Categoria" />
             </SelectTrigger>
             <SelectContent>

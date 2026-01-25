@@ -2,8 +2,8 @@ import prisma from "@/lib/db";
 import { estoque_movimentacoes } from '../app/generated/prisma/client';
 import * as repository from '../repositories/estoque-movimentacoes.repository';
 
-export const getAllEstoqueMovimentacoes = async (): Promise<estoque_movimentacoes[]> => {
-  return repository.findAll();
+export const getAllEstoqueMovimentacoes = async (filters?: repository.EstoqueMovimentacaoFilters) => {
+  return repository.findAll(filters || {});
 };
 
 export const getEstoqueMovimentacaoById = async (id: bigint): Promise<estoque_movimentacoes | null> => {

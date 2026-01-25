@@ -2,14 +2,23 @@ import * as service from "@/services/estoque-movimentacoes.service";
 import { NextResponse } from "next/server";
 
 
-export async function GET() {
-  const estoqueMovimentacoes = await service.getAllEstoqueMovimentacoes();
-  const estoqueMovimentacoesSerialized = estoqueMovimentacoes.map(estoqueMovimentacao => {
-    return JSON.parse(
-      JSON.stringify(estoqueMovimentacao, (_key, value) => typeof value === "bigint" ? value.toString() : value)
-    )
-  })
-  return NextResponse.json(estoqueMovimentacoesSerialized);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+
+  const filters = {
+    search: searchParams.get("search") || undefined,
+    tipo: (searchParams.get("tipo") as "entrada" | "saida") || undefined,
+    page: Number(searchParams.get("page")) || 1,
+    limit: Number(searchParams.get("limit")) || 10,
+  };
+
+  const result = await service.getAllEstoqueMovimentacoes(filters);
+
+  const dataSerialized = result.data.map(item => JSON.parse(
+    JSON.stringify(item, (_key, value) => typeof value === "bigint" ? value.toString() : value)
+  ));
+
+  return NextResponse.json({ data: dataSerialized, total: result.total, page: result.page, limit: result.limit, lastPage: result.lastPage });
 }
 
 export async function POST(request: Request) {
