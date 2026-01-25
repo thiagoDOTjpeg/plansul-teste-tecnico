@@ -5,6 +5,7 @@ import {
   createEstoqueMovimentacaoSchema,
   useCreateEstoqueMovimentacao,
 } from "@/hooks/use-estoque-movimentacoes";
+import { Estoque } from "@/hooks/use-estoques";
 import { toast } from "sonner";
 import { BaseModal } from "../custom/base-modal";
 import { DynamicForm } from "../custom/dynamic-form";
@@ -12,9 +13,11 @@ import { DynamicForm } from "../custom/dynamic-form";
 export function AddEstoqueMovimentacaoModal({
   isOpen,
   onClose,
+  estoque,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  estoque: Estoque | null;
 }) {
   const createEstoqueMovimentacaoMutation = useCreateEstoqueMovimentacao();
 
@@ -67,7 +70,7 @@ export function AddEstoqueMovimentacaoModal({
         onSubmit={handleSubmit}
         fields={formFields}
         defaultValues={{
-          produto_id: "",
+          produto_id: estoque?.id,
           quantidade: "",
           tipo_movimentacao: "entrada",
         }}

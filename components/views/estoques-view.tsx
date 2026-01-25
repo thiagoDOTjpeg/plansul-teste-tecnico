@@ -6,14 +6,17 @@ import { DataTable } from "../custom/data-table";
 import { AddEstoqueMovimentacaoModal } from "../estoque-movimentacoes/estoque-movimentacoes-add-modal";
 import { AdjustStockModal } from "../estoques/estoque-adjust-modal";
 import { estoqueColumns } from "../estoques/estoque-columns";
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 export function EstoquesView() {
   const { data: estoques, isLoading, isError, error } = useEstoques();
   const [selectedEstoque, setSelectedEstoque] = useState<Estoque | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [modalEstoque, setModalEstoque] = useState<Estoque | null>(null);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+
+  const columns = estoqueColumns({
+    onMovimentar: (estoque: Estoque) => setModalEstoque(estoque),
+  });
 
   const handleEdit = (id: string) => {
     const estoqueToEdit = estoques?.find((est) => est.id === id);
@@ -34,7 +37,7 @@ export function EstoquesView() {
   return (
     <>
       <DataTable
-        columns={estoqueColumns}
+        columns={columns}
         data={estoques || []}
         onEdit={handleEdit}
         isLoading={isLoading}
@@ -42,16 +45,12 @@ export function EstoquesView() {
         searchComponent={
           <Input placeholder="Buscar estoques..." className="max-w-sm" />
         }
-        actionButtons={[
-          <Button key="new-movement" onClick={() => setIsAddModalOpen(true)}>
-            Nova Movimentação
-          </Button>,
-        ]}
       />
 
       <AddEstoqueMovimentacaoModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        isOpen={!!modalEstoque}
+        estoque={modalEstoque}
+        onClose={() => setModalEstoque(null)}
       />
 
       <AdjustStockModal

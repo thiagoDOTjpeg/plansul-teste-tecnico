@@ -16,6 +16,7 @@ export type Estoque = {
     sku: string;
     nome: string;
     marca: string | null;
+    estoque_minimo: number
   }
 }
 

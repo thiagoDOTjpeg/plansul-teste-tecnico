@@ -12,6 +12,7 @@ export const getEstoqueMovimentacaoById = async (id: bigint): Promise<estoque_mo
 
 export const createEstoqueMovimentacao = async (data: Omit<estoque_movimentacoes, 'id' | 'criado_em'>): Promise<estoque_movimentacoes> => {
   const { produto_id, quantidade, tipo } = data;
+  const quantidadeNumber = Number(quantidade)
 
   return await prisma.$transaction(async (tx) => {
     const estoqueAtual = await tx.estoque.findUnique({
@@ -20,7 +21,7 @@ export const createEstoqueMovimentacao = async (data: Omit<estoque_movimentacoes
 
     if (!estoqueAtual) throw new Error("Estoque não encontrado para este produto");
 
-    if (tipo === "saida" && estoqueAtual.quantidade < quantidade) {
+    if (tipo === "saida" && estoqueAtual.quantidade < quantidadeNumber) {
       throw new Error("Quantidade insuficiente em estoque para esta saída");
     }
 
@@ -28,14 +29,14 @@ export const createEstoqueMovimentacao = async (data: Omit<estoque_movimentacoes
       where: { produto_id },
       data: {
         quantidade: {
-          [tipo === "entrada" ? "increment" : "decrement"]: quantidade
+          [tipo === "entrada" ? "increment" : "decrement"]: quantidadeNumber
         },
         atualizado_em: new Date()
       }
     });
 
     return await tx.estoque_movimentacoes.create({
-      data: { produto_id, quantidade, tipo }
+      data: { produto_id, quantidade: quantidadeNumber, tipo }
     });
   });
 };

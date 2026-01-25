@@ -59,6 +59,7 @@ export const useCreateEstoqueMovimentacao = () => {
     mutationFn: createEstoqueMovimentacao,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["estoque-movimentacoes"] })
+      queryClient.invalidateQueries({ queryKey: ["estoques"] })
     }
   })
 }
