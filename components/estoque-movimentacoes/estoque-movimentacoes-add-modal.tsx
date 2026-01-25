@@ -70,7 +70,7 @@ export function AddEstoqueMovimentacaoModal({
         onSubmit={handleSubmit}
         fields={formFields}
         defaultValues={{
-          produto_id: estoque?.id,
+          produto_id: estoque?.produto_id,
           quantidade: "",
           tipo_movimentacao: "entrada",
         }}

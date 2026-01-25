@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { DataTable } from "../custom/data-table";
 import { AddEstoqueMovimentacaoModal } from "../estoque-movimentacoes/estoque-movimentacoes-add-modal";
+import { AdjustStockModal } from "../estoques/estoque-adjust-modal";
 import { estoqueColumns } from "../estoques/estoque-columns";
 import { Input } from "../ui/input";
 import {
@@ -24,7 +25,12 @@ export function EstoquesView() {
   const search = searchParams.get("search") || "";
   const categoriaId = searchParams.get("categoria_id") || "all";
 
-  const { data: estoques, isLoading } = useEstoques({
+  const {
+    data: estoques,
+    isLoading,
+    isError,
+    error,
+  } = useEstoques({
     search,
     categoria_id: categoriaId,
   });
@@ -33,6 +39,16 @@ export function EstoquesView() {
     onMovimentar: (estoque: Estoque) => setModalEstoque(estoque),
   });
   const [modalEstoque, setModalEstoque] = useState<Estoque | null>(null);
+  const [selectedEstoque, setSelectedEstoque] = useState<Estoque | null>(null);
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+
+  const handleEdit = (id: string) => {
+    const estoqueToEdit = estoques?.data?.find((est) => est.id === id);
+    if (estoqueToEdit) {
+      setSelectedEstoque(estoqueToEdit);
+      setIsAdjustModalOpen(true);
+    }
+  };
 
   const updateFilters = (key: string, value: string | boolean) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -44,12 +60,22 @@ export function EstoquesView() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  if (isError) {
+    return (
+      <div className="text-red-500">
+        Error: {error?.message || "Failed to load estoques."}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <DataTable
         columns={columns}
         data={estoques?.data || []}
         isLoading={isLoading}
+        onEdit={handleEdit}
+        editButtonText="Ajustar"
         searchComponent={
           <>
             <Input
@@ -81,6 +107,12 @@ export function EstoquesView() {
         isOpen={!!modalEstoque}
         estoque={modalEstoque}
         onClose={() => setModalEstoque(null)}
+      />
+
+      <AdjustStockModal
+        isOpen={isAdjustModalOpen}
+        onClose={() => setIsAdjustModalOpen(false)}
+        estoque={selectedEstoque}
       />
     </div>
   );
