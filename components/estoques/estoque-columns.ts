@@ -29,7 +29,6 @@ export const estoqueColumns: ColumnDef<Estoque>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue("atualizado_em"));
       return format(date, "dd/MM/yyyy HH:mm");
-    }
+    },
   },
-
 ]

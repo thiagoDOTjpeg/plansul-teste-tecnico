@@ -9,7 +9,7 @@ export const updateEstoqueSchema = z.object({
 export type Estoque = {
   id: string;
   produto_id: string;
-  quantidade: number;
+  quantidade: string;
   atualizado_em: string;
   produtos?: {
     id: string;

@@ -1,14 +1,16 @@
 "use client";
 
-import * as React from "react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  useReactTable,
   getPaginationRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
+import * as React from "react";
 
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -17,8 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,6 +29,8 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   filterComponent?: React.ReactNode;
   searchComponent?: React.ReactNode;
   actionButtons?: React.ReactNode[];
+  editButtonText?: string;
+  deleteButtonText?: string;
   // TODO: Implement actual pagination logic
   // currentPage?: number;
   // totalPages?: number;
@@ -44,6 +46,8 @@ export function DataTable<TData extends { id: string }, TValue>({
   filterComponent,
   searchComponent,
   actionButtons,
+  editButtonText,
+  deleteButtonText,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -121,7 +125,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                           onClick={() => onEdit(row.original.id)} // Assuming id field exists
                           className="mr-2"
                         >
-                          Edit
+                          {editButtonText || "Edit"}
                         </Button>
                       )}
                       {onDelete && (
@@ -129,7 +133,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                           variant="ghost"
                           onClick={() => onDelete(row.original.id)} // Assuming id field exists
                         >
-                          Delete
+                          {deleteButtonText || "Delete"}
                         </Button>
                       )}
                     </TableCell>
