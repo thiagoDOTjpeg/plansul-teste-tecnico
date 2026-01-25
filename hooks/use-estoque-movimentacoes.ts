@@ -7,6 +7,13 @@ export const createEstoqueMovimentacaoSchema = z.object({
   tipo_movimentacao: z.enum(["entrada", "saida"])
 });
 
+export interface EstoqueMovimentacaoFilters {
+  search?: string;
+  tipo?: "entrada" | "saida";
+  page?: number;
+  limit?: number;
+}
+
 export type EstoqueMovimentacao = {
   id: string;
   quantidade: string;
@@ -22,8 +29,21 @@ export type EstoqueMovimentacao = {
 
 export type CreateEstoqueMovimentacaoPayload = z.infer<typeof createEstoqueMovimentacaoSchema>;
 
-const fetchEstoqueMovimentacoes = async (): Promise<EstoqueMovimentacao[]> => {
-  const response = await fetch("/api/estoque-movimentacoes");
+export type EstoqueMovimentacaoResponse = {
+  data: EstoqueMovimentacao[];
+  total: number;
+  page: number;
+  limit: number;
+  lastPage: number;
+}
+
+const fetchEstoqueMovimentacoes = async (filters: EstoqueMovimentacaoFilters): Promise<EstoqueMovimentacaoResponse> => {
+  const params = new URLSearchParams();
+  if (filters?.search) params.append('search', filters.search);
+  if (filters?.page) params.append('page', filters.page.toString());
+  if (filters?.limit) params.append('limit', filters.limit.toString());
+
+  const response = await fetch(`/api/estoque-movimentacoes?${params.toString()}`);
   if (!response.ok) {
     throw new Error("Failed to fetch stocks movements");
   }
@@ -46,10 +66,10 @@ const createEstoqueMovimentacao = async (payload: CreateEstoqueMovimentacaoPaylo
   return response.json();
 }
 
-export const useEstoqueMovimentacoes = () => {
-  return useQuery<EstoqueMovimentacao[], Error>({
-    queryKey: ["estoque-movimentacoes"],
-    queryFn: fetchEstoqueMovimentacoes,
+export const useEstoqueMovimentacoes = (filters: EstoqueMovimentacaoFilters) => {
+  return useQuery<EstoqueMovimentacaoResponse, Error>({
+    queryKey: ["estoque-movimentacoes", filters],
+    queryFn: () => fetchEstoqueMovimentacoes(filters),
   })
 }
 
