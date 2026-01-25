@@ -1,30 +1,51 @@
 "use client";
 
 import { useEstoqueMovimentacoes } from "@/hooks/use-estoque-movimentacoes";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DataTable } from "../custom/data-table";
 import { estoqueMovimentacoesColumns } from "../estoque-movimentacoes/estoque-movimentacoes-columns";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export function EstoqueMovimentacoesView() {
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [inputValue, setInputValue] = useState("");
-  const [search, setSearch] = useState<string | undefined>(undefined);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setSearch(inputValue || undefined);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(t);
-  }, [inputValue]);
+  const search = searchParams.get("search") || "";
+  const tipo = searchParams.get("tipo") || "all";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = 10;
+
+  const tipoFilter = tipo === "all" ? undefined : (tipo as "entrada" | "saida");
 
   const { data, isLoading, isError, error } = useEstoqueMovimentacoes({
     search,
+    tipo: tipoFilter,
     page,
     limit,
   });
+
+  const updateFilters = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (!value || value === "all") {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    if (key !== "page") {
+      params.delete("page");
+    }
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   if (isError) {
     return (
@@ -46,13 +67,27 @@ export function EstoqueMovimentacoesView() {
           <Input
             placeholder="Buscar por SKU, Nome ou Marca..."
             className="max-w-sm"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            value={search}
+            onChange={(e) => updateFilters("search", e.target.value)}
           />
+        }
+        filterComponent={
+          <Select value={tipo} onValueChange={(v) => updateFilters("tipo", v)}>
+            <SelectTrigger className="w-50">
+              <SelectValue placeholder="Filtrar por Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Tipos</SelectItem>
+              <SelectItem value="entrada">Entrada</SelectItem>
+              <SelectItem value="saida">Saída</SelectItem>
+            </SelectContent>
+          </Select>
         }
         pageCount={data?.lastPage}
         currentPage={data?.page || page}
-        onPageChange={(p: number) => setPage(p)}
+        onPageChange={(newPage: number) =>
+          updateFilters("page", newPage.toString())
+        }
       />
     </>
   );

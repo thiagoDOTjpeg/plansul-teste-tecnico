@@ -41,6 +41,7 @@ const fetchEstoqueMovimentacoes = async (filters: EstoqueMovimentacaoFilters): P
   const params = new URLSearchParams();
   if (filters?.search) params.append('search', filters.search);
   if (filters?.page) params.append('page', filters.page.toString());
+  if (filters?.tipo) params.append('tipo', filters?.tipo);
   if (filters?.limit) params.append('limit', filters.limit.toString());
 
   const response = await fetch(`/api/estoque-movimentacoes?${params.toString()}`);
