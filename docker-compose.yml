@@ -14,5 +14,17 @@ services:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data_v17:/var/lib/postgresql/data
 
+  app:
+    build: .
+    container_name: junior-technical-assessment-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
+    depends_on:
+      - db
+
+
 volumes:
   postgres_data_v17:

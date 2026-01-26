@@ -1,50 +1,63 @@
 # Manual de Uso do Projeto
 
-Este guia explica como configurar o ambiente, rodar a aplicação e utilizar as funcionalidades do sistema.
+Este guia explica como configurar e rodar a aplicação utilizando Docker.
 
 ## Pré-requisitos
 
 Certifique-se de ter instalado:
-- **Node.js** (v18 ou superior recomendado)
-- **Docker** e **Docker Compose** (para o banco de dados)
+- **Docker** e **Docker Compose**
 
-## 1. Configuração e Execução
+---
 
-### Passo 1: Instalar dependências
-Na raiz do projeto, execute:
+## 🚀 Como Rodar (Modo Rápido)
+
+Com o Docker instalado, você pode subir toda a aplicação (Banco de Dados + API + Frontend) com um único comando:
+
+```bash
+docker compose up --build -d
+```
+
+O comando irá:
+1. Subir o banco PostgreSQL.
+2. Buildar a aplicação Next.js (Imagem otimizada).
+3. Iniciar o servidor na porta **3000**.
+
+Acesse: [http://localhost:3000](http://localhost:3000)
+
+> **Nota:** As migrações do banco e a geração do Prisma Client são feitas automaticamente durante o build do Dockerfile.
+
+---
+
+## Configuração Local (Opcional - Sem Docker para o App)
+
+Caso prefira rodar o **Next.js** localmente (fora do Docker) enquanto mantém o banco no Docker:
+
+### Passo 1: Dependências
 ```bash
 npm install
 ```
 
-### Passo 2: Subir o Banco de Dados
-Inicie o container do PostgreSQL:
+### Passo 2: Banco de Dados
 ```bash
-docker compose up -d
+# Sobe apenas o banco
+docker compose up db -d
 ```
 
-### Passo 3: Configurar Variáveis de Ambiente
-Crie um arquivo `.env` na raiz do projeto conforme o modelo abaixo:
-
+### Passo 3: Variáveis de Ambiente
+Crie um arquivo `.env`:
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/postgres"
 ```
-*(Nota: A porta padrão configurada no docker-compose deste projeto é 5433, diferente da padrão 5432, para evitar conflitos)*
 
-### Passo 4: Inicializar o Banco (Prisma)
-Gere os tipos do cliente Prisma:
+### Passo 4: Inicializar Prisma
 ```bash
 npx prisma generate
 ```
 
-*(Opcional: Se quiser popular o banco com dados iniciais, você pode rodar script SQL em `sql/init.sql` se disponível, ou criar dados pela aplicação)*
-
-### Passo 5: Rodar a Aplicação
-Inicie o servidor de desenvolvimento:
+### Passo 5: Rodar
 ```bash
 npm run dev
 ```
-
-Acesse: [http://localhost:3000](http://localhost:3000)
 
 ---
 
@@ -55,7 +68,7 @@ O sistema é dividido em abas para facilitar a navegação:
 ### Aba "Categorias"
 - **Visualizar:** Lista todas as categorias cadastradas.
 - **Criar:** Use o botão "Nova Categoria" para adicionar (Ex: Eletrônicos, Móveis).
-- **Ações:** Edição e Exclusão (se implementado botões na lista).
+- **Ações:** Edição e Exclusão.
 
 ### Aba "Produtos"
 - **Visualizar:** Lista de produtos com paginação. Use a barra de busca para filtrar por nome ou SKU.
@@ -75,11 +88,3 @@ O sistema é dividido em abas para facilitar a navegação:
     3. Digite a Quantidade.
     4. Escolha o Tipo ("Entrada" para adicionar, "Saída" para remover).
     5. Ao salvar, o saldo na aba "Estoques" será atualizado automaticamente.
-
----
-
-## 3. Comandos Úteis
-
-- **Lint:** `npm run lint` (Verifica qualidade do código)
-- **Build:** `npm run build` (Gera versão de produção)
-- **Start:** `npm run start` (Roda versão de produção)
