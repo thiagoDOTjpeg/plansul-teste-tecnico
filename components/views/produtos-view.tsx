@@ -7,9 +7,17 @@ import { DeleteProductDialog } from "@/components/produtos/produto-delete-dialog
 import { EditProductModal } from "@/components/produtos/produto-edit-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCategories } from "@/hooks/use-categorias";
 import { Produto, useProdutos } from "@/hooks/use-produtos";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export function ProdutosView() {
   const router = useRouter();
@@ -34,6 +42,8 @@ export function ProdutosView() {
   const [productIdToDelete, setProductIdToDelete] = useState<string | null>(
     null,
   );
+
+  const { data: categorias } = useCategories();
 
   const handleEdit = (id: string) => {
     const productToEdit = produtos?.data?.find((prod) => prod.id === id);
@@ -89,6 +99,24 @@ export function ProdutosView() {
             onChange={(e) => updateFilters("search", e.target.value)}
             className="max-w-sm"
           />
+        }
+        filterComponent={
+          <Select
+            value={categoriaId}
+            onValueChange={(v) => updateFilters("categoria_id", v)}
+          >
+            <SelectTrigger className="w-50">
+              <SelectValue placeholder="Filtrar por Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Categorias</SelectItem>
+              {categorias?.map((c) => (
+                <SelectItem key={c.id} value={c.id.toString()}>
+                  {c.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         }
         actionButtons={[
           <Button key="new-product" onClick={() => setIsAddModalOpen(true)}>

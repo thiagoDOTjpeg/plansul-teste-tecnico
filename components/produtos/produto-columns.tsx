@@ -1,9 +1,9 @@
 "use client";
 
-import { Produto } from "@/hooks/use-produtos";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown } from "lucide-react";
+import { Produto } from "../../hooks/use-produtos";
 import { Button } from "../ui/button";
 
 export const produtoColumns: ColumnDef<Produto>[] = [
