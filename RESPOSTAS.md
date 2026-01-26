@@ -25,3 +25,5 @@ Identifiquei que o endpoint de listagem de produtos retornava erro por ausência
     *   **Estado no Frontend:** Utilizaria Zustand para o estado global da UI (persistência de filtros e paginação entre abas), eliminando o prop drilling e mantendo o React Query focado exclusivamente no cache e sincronização do estado do servidor.
 
     *   **Estratégias de Lock:** Para evoluir a gestão de estoque, a implementação de Optimistic Locking seria a escolha técnica para garantir consistência via versionamento de registros, oferecendo um throughput superior ao Pessimistic Locking em operações de larga escala.
+
+6.  **Versionamento de Banco de Dados (Migrations):** Atualmente a inicialização do banco é feita via script `init.sql` no Docker. Para um ambiente de produção evolutivo e rastreável, a adoção de **Prisma Migrate** é a evolução recomendada. Isso substitui scripts manuais por um fluxo de trabalho automatizado que gera arquivos SQL de migração baseados no schema, permitindo versionamento rigoroso, rollbacks seguros e aplicação consistente de alterações estruturais em todos os ambientes.
