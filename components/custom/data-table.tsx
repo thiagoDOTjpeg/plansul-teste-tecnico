@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
@@ -52,12 +54,17 @@ export function DataTable<TData extends { id: string }, TValue>({
   currentPage = 1,
   onPageChange,
 }: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+
   const table = useReactTable({
     data,
     columns,
     pageCount: pageCount,
     manualPagination: true,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   const generateSkeletonRow = (columnCount: number, key: number) => (
