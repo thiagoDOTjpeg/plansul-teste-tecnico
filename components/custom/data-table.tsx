@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  SortingFn,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -39,6 +40,22 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   onPageChange?: (page: number) => void;
 }
 
+const caseInsensitiveSort: SortingFn<any> = (rowA, rowB, columnId) => {
+  const valA = rowA.getValue(columnId);
+  const valB = rowB.getValue(columnId);
+
+  if (typeof valA === "string" && typeof valB === "string") {
+    return valA.toLowerCase().localeCompare(valB.toLowerCase());
+  }
+
+  if (valA == null) return 1;
+  if (valB == null) return -1;
+
+  if (valA < valB) return -1;
+  if (valA > valB) return 1;
+  return 0;
+};
+
 export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
@@ -65,6 +82,12 @@ export function DataTable<TData extends { id: string }, TValue>({
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    sortingFns: {
+      caseInsensitive: caseInsensitiveSort,
+    },
+    defaultColumn: {
+      sortingFn: caseInsensitiveSort,
+    },
   });
 
   const generateSkeletonRow = (columnCount: number, key: number) => (
